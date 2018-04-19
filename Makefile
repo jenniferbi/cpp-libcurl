@@ -10,3 +10,7 @@ http:
 	g++ -g -O2 -ftemplate-depth-256   -o http http.o -lboost_system -lboost_thread-mt -lboost_chrono-mt
 http.o: 
 
+.PHONY: clean
+clean:
+	rm *.o simple
+

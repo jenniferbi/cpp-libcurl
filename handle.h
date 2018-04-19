@@ -3,7 +3,7 @@
 #include <istream>
 #include <ostream>
 #include <string>
-#include <boost/asio.hpp>
+#include <asio.hpp>
 #include <boost/bind.hpp>
 #include "urldata.h"
 
@@ -48,11 +48,15 @@ class Multi : public Curl {
 };
 
 void Easy::perform(){
-    boost::asio::io_service io_service;
-    HttpHandle h(io_service, "www.boost.org", "/LICENSE_1_0.txt");
+    asio::io_service io_service;
+    httphand h(io_service, "images.metmuseum.org", "/CRDImages/as/original/DP141263.jpg");
+   /* httphand h(io_service, "images.metmuseum.org", "/CRDImages/as/original/DP141051.jpg");
+    httphand h(io_service, "images.metmuseum.org", "/CRDImages/as/original/DP123282.jpg");
+    httphand h(io_service, "images.metmuseum.org", "/CRDImages/as/original/DP140984.jpg");
+    httphand h(io_service, "images.metmuseum.org", "/CRDImages/ep/original/DT1946.jpg");*/
     h.connect();
-    //Protocol * p = new HttpHandler(io_service, "www.boost.org", "/LICENSE_1_0.txt");
-    //p->connect();
+//    Protocol * p = new HttpHandle(io_service, "www.boost.org", "/LICENSE_1_0.txt");
+//    p->connect();
 }
 
 #endif /* HANDLE_H */
