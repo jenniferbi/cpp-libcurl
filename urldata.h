@@ -2,17 +2,16 @@
 #include <istream>
 #include <ostream>
 #include <string>
-#include <boost/asio.hpp>
-#include <boost/bind.hpp>
+#include <asio.hpp>
 
 #ifndef URLDATA_H
 #define URLDATA_H
 // abstract class 
-class Protocol {
+class protocol {
     public:
-//        virtual void setup_connection(struct connectdata *);
+        virtual void setup_connection(struct connectdata *);
         virtual int connect();
-  //      virtual void disconnect(struct connectdata *);
+        virtual void disconnect(struct connectdata *);
 };
 
 // The connectdata struct contains all fields and variables that should be
@@ -29,28 +28,28 @@ struct connectdata {
 
 };
 
-using boost::asio::ip::tcp;
-class HttpHandle : public Protocol {
+using asio::ip::tcp;
+class httphand /*: public Protocol*/ {
   private:
-    boost::asio::io_service* io_serv;
+    asio::io_service* io_serv;
     tcp::resolver resolver_;
     tcp::socket socket_;
-    boost::asio::streambuf request_;
-    boost::asio::streambuf response_;
-  
+    asio::streambuf request_;
+    asio::streambuf response_;
+    unsigned long long max_timeout; 
     // member fns
-    void handle_resolve(const boost::system::error_code& err,
+    void handle_resolve(const asio::error_code& err,
         tcp::resolver::iterator endpoint_iterator);
-    void handle_connect(const boost::system::error_code& err,
+    void handle_connect(const asio::error_code& err,
         tcp::resolver::iterator endpoint_iterator);
-    void handle_write_request(const boost::system::error_code& err);
-    void handle_read_status_line(const boost::system::error_code& err);
-    void handle_read_headers(const boost::system::error_code& err);
-    void handle_read_content(const boost::system::error_code& err);
+    void handle_write_request();//const asio::error_code& err);
+    void handle_read_status_line();//const asio::error_code& err);
+    void handle_read_headers();//const asio::error_code& err);
+    void handle_read_content();//const asio::error_code& err);
 
   public:
     // constructor
-    HttpHandle(boost::asio::io_service& io_service,
+    httphand(asio::io_service& io_service,
     const std::string& server, const std::string& path);
     // connect function
     int connect();

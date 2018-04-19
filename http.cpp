@@ -12,12 +12,11 @@
 #include <istream>
 #include <ostream>
 #include <string>
-#include <boost/asio.hpp>
-#include <boost/bind.hpp>
+#include <asio.hpp>
 
-using boost::asio::ip::tcp;
+using asio::ip::tcp;
 
-HttpHandle::HttpHandle(boost::asio::io_service& io_service,
+httphand::httphand(asio::io_service& io_service,
       const std::string& server, const std::string& path)
     : resolver_(io_service), socket_(io_service) // init list
 {
@@ -35,36 +34,44 @@ HttpHandle::HttpHandle(boost::asio::io_service& io_service,
     // into a list of endpoints.
     tcp::resolver::query query(server, "http");
     resolver_.async_resolve(query,
-        boost::bind(&HttpHandle::handle_resolve, this,
-          boost::asio::placeholders::error,
-          boost::asio::placeholders::iterator));
+        [this](const asio::error_code& err, tcp::resolver::iterator endpoint_iterator)
+        {
+            if(!err)
+            {
+                httphand::handle_resolve(err, endpoint_iterator);
+            }
+            else
+            {
+                std::cout << "Error: " << err.message() << "\n";
+            }
+        });
+
 }
 
-void HttpHandle::handle_resolve(const boost::system::error_code& err,
-    tcp::resolver::iterator endpoint_iterator)
+void httphand::handle_resolve(const asio::error_code& err, tcp::resolver::iterator endpoint_iterator)
 {
-  if (!err)
-  {
       // Attempt a connection to the first endpoint in the list. Each endpoint
       // will be tried until we successfully establish a connection.
     tcp::endpoint endpoint = *endpoint_iterator;
     socket_.async_connect(endpoint,
-        boost::bind(&HttpHandle::handle_connect, this,
-          boost::asio::placeholders::error, ++endpoint_iterator));
-  }
-  else
-    std::cout << "Error: " << err.message() << "\n";
+         [this, &endpoint_iterator](const asio::error_code& err)
+         {
+            httphand::handle_connect(err, ++endpoint_iterator);
+         });
+
 }
 
-void HttpHandle::handle_connect(const boost::system::error_code& err,
+void httphand::handle_connect(const asio::error_code& err,
     tcp::resolver::iterator endpoint_iterator)
 {
   if (!err)
   {
     // The connection was successful. Send the request.
-    boost::asio::async_write(socket_, request_,
-        boost::bind(&HttpHandle::handle_write_request, this,
-          boost::asio::placeholders::error));
+    asio::async_write(socket_, request_,
+         [this](const asio::error_code& err, std::size_t bytes)
+         {
+             httphand::handle_write_request();
+         });
   }
   else if (endpoint_iterator != tcp::resolver::iterator())
   {
@@ -72,32 +79,35 @@ void HttpHandle::handle_connect(const boost::system::error_code& err,
     socket_.close();
     tcp::endpoint endpoint = *endpoint_iterator;
     socket_.async_connect(endpoint,
-        boost::bind(&HttpHandle::connect, this,
-          boost::asio::placeholders::error, ++endpoint_iterator));
+         [this, &endpoint_iterator](std::error_code err)
+         {
+            httphand::handle_connect(err, ++endpoint_iterator);
+         });
+
   }
   else
     std::cout << "Error: " << err.message() << "\n";
 }
 
-void HttpHandle::handle_write_request(const boost::system::error_code& err)
+void httphand::handle_write_request()
 {
-  if (!err)
-  {
     // Read the response status line.
-    boost::asio::async_read_until(socket_, response_, "\r\n",
-        boost::bind(&HttpHandle::handle_read_status_line, this,
-          boost::asio::placeholders::error));
-  }
-  else
-  {
-    std::cout << "Error: " << err.message() << "\n";
-  }
+    asio::async_read_until(socket_, response_, "\r\n",
+         [this](const asio::error_code& err, std::size_t bytes)
+         {  
+            if (!err)
+            {
+                httphand::handle_read_status_line();
+            }
+            else
+            {
+                std::cout << "Error: " << err.message() << "\n";
+            }
+         });
 }
 
-void HttpHandle::handle_read_status_line(const boost::system::error_code& err)
+void httphand::handle_read_status_line()
 {
-  if (!err)
-  {
     // Check that response is OK.
     std::istream response_stream(&response_);
     std::string http_version;
@@ -119,20 +129,18 @@ void HttpHandle::handle_read_status_line(const boost::system::error_code& err)
     }
 
     // Read the response headers, which are terminated by a blank line.
-    boost::asio::async_read_until(socket_, response_, "\r\n\r\n",
-        boost::bind(&HttpHandle::handle_read_headers, this,
-          boost::asio::placeholders::error));
-  }
-  else
-  {
-    std::cout << "Error: " << err << "\n";
-  }
+    asio::async_read_until(socket_, response_, "\r\n\r\n",
+         [this](const asio::error_code& err, std::size_t bytes)
+         {
+            if (!err)
+            {
+                httphand::handle_read_headers();
+            }
+         });
 }
 
-void HttpHandle::handle_read_headers(const boost::system::error_code& err)
+void httphand::handle_read_headers()
 {
-  if (!err)
-  {
     // Process the response headers.
     std::istream response_stream(&response_);
     std::string header;
@@ -145,38 +153,36 @@ void HttpHandle::handle_read_headers(const boost::system::error_code& err)
       std::cout << &response_;
 
     // Start reading remaining data until EOF.
-    boost::asio::async_read(socket_, response_,
-        boost::asio::transfer_at_least(1),
-        boost::bind(&HttpHandle::handle_read_content, this,
-          boost::asio::placeholders::error));
-  }
-  else
-  {
-    std::cout << "Error: " << err << "\n";
-  }
+    asio::async_read(socket_, response_,
+        asio::transfer_at_least(1),
+         [this](const asio::error_code& err, std::size_t bytes)
+         {
+            if (!err)
+            {
+                httphand::handle_read_content();
+            }
+         });
 }
 
-void HttpHandle::handle_read_content(const boost::system::error_code& err)
+void httphand::handle_read_content()
 {
-  if (!err)
-  {
     // Write all of the data that has been read so far.
     std::cout << &response_;
 
     // Continue reading remaining data until EOF.
-    boost::asio::async_read(socket_, response_,
-        boost::asio::transfer_at_least(1),
-        boost::bind(&HttpHandle::handle_read_content, this,
-          boost::asio::placeholders::error));
-  }
-  else if (err != boost::asio::error::eof)
-  {
-    std::cout << "Error: " << err << "\n";
-  }
+    asio::async_read(socket_, response_,
+        asio::transfer_at_least(1),
+         [this](const asio::error_code& err, std::size_t bytes)
+         {
+            if (!err)
+            {
+                httphand::handle_read_content();
+            }
+         });
 }
 
 
-int HttpHandle::connect() {
+int httphand::connect() {
   try
   {
     io_serv->run();
