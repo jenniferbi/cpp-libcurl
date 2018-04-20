@@ -6,11 +6,10 @@ INCLUDES =
 
 
 all: simple threaded
-threaded: http.o handle.o
+threaded: http.o 
 threaded.o: handle.h urldata.h
-simple: http.o handle.o
+simple: http.o 
 simple.o: handle.h urldata.h 
-handle.o: handle.h urldata.h
 http:
 	g++ -g -O2 -ftemplate-depth-256   -o http http.o -lboost_system -lboost_thread-mt -lboost_chrono-mt
 http.o: urldata.h

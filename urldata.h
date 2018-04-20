@@ -29,19 +29,18 @@ struct connectdata {
 };
 
 #define CURLPP_OPT_URL    100
-#define CURLPP_OPT_SERVER 101
-#define CURLPP_OPT_PATH   102
-class UserDefined {
-    std::string server;
+#define CURLPP_OPT_PATH   101
+#define CURLPP_OPT_PORT   102
+#define CURLPP_OPT_VERSION 103
+#define CURLPP_OPT_MAXFILE 104
+#define CURLPP_OPT_TIMEOUT 105
+struct UserDefined {
+    std::string url;
     std::string path;
-public:
-    UserDefined();
-    template<typename T>
-        UserDefined(std::initializer_list<T> il);
-    template<typename T>
-        void setopt(int a, T b);
-    template<typename T, typename... Args>
-        void setopt(int a, T b, Args... args);
+    long timeout;
+    long use_port;
+    long httpversion;
+    long max_filesize; /* bytes*/
 };
 
 using asio::ip::tcp;
