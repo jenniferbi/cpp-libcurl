@@ -25,14 +25,13 @@ class Curl {
 
 
 class Easy : public Curl {
+    UserDefined set();
     public:
         //struct connectdata *easy_conn;
-        
         void initialize() override;
         void perform() override;
         void setOpt() override; // variadic options
         void cleanup() override;
-
 };
 
 //X(std::initializer_list<U>): v(il) { }
@@ -43,9 +42,10 @@ class Multi : public Curl {
         void perform() override;
         void setOpt() override; // variadic options
         void cleanup() override;
-        Easy * easy_handle; 
+        Easy * easy_handle;
 
 };
+
 
 void Easy::perform(){
     asio::io_service io_service;
@@ -58,5 +58,6 @@ void Easy::perform(){
 //    Protocol * p = new HttpHandle(io_service, "www.boost.org", "/LICENSE_1_0.txt");
 //    p->connect();
 }
+
 
 #endif /* HANDLE_H */

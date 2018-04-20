@@ -6,7 +6,7 @@
 
 #ifndef URLDATA_H
 #define URLDATA_H
-// abstract class 
+// abstract class
 class protocol {
     public:
         virtual void setup_connection(struct connectdata *);
@@ -20,12 +20,28 @@ struct connectdata {
   //  bool inuse;
    // long connection_id;
     // dns_entry is the particular host we use. points to an entry in
-    // DNS cache. Only modified in done(). The entry will be NULL if the 
+    // DNS cache. Only modified in done(). The entry will be NULL if the
     // connection is re-used, as then there is no name resolve done.
    // struct dns_entry * dns_entry;
     std::string server;
     std::string path;
 
+};
+
+#define CURLPP_OPT_URL    100
+#define CURLPP_OPT_SERVER 101
+#define CURLPP_OPT_PATH   102
+class UserDefined {
+    std::string server;
+    std::string path;
+public:
+    UserDefined();
+    template<typename T>
+        UserDefined(std::initializer_list<T> il);
+    template<typename T>
+        void setopt(int a, T b);
+    template<typename T, typename... Args>
+        void setopt(int a, T b, Args... args);
 };
 
 using asio::ip::tcp;
@@ -36,7 +52,7 @@ class httphand /*: public Protocol*/ {
     tcp::socket socket_;
     asio::streambuf request_;
     asio::streambuf response_;
-    unsigned long long max_timeout; 
+    unsigned long long max_timeout;
     // member fns
     void handle_resolve(const asio::error_code& err,
         tcp::resolver::iterator endpoint_iterator);
