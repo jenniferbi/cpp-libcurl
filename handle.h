@@ -25,12 +25,13 @@ class Curl {
 
 
 class Easy : public Curl {
+    UserDefined set();
     public:
-     //   void initialize() override;
+        //struct connectdata *easy_conn;
+        void initialize() override;
         void perform() override;
-       // void setOpt() override; // variadic options
-       // void cleanup() override;
-
+        void setOpt() override; // variadic options
+        void cleanup() override;
 };
 
 //X(std::initializer_list<U>): v(il) { }
@@ -45,7 +46,6 @@ class Multi : public Curl {
         size_t thread_pool_size = 2;
         vector<shared_ptr<httphand> > easy_transfers; 
 };
-
 
 
 

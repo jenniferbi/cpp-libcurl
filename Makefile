@@ -1,8 +1,8 @@
 CC = g++
 CXX = g++
 CXXFLAGS = $(INCLUDES) -g -O2 -ftemplate-depth-256 -std=c++14 -DASIO_STANDALONE
-LDFLAGS = -g -lssl -lcrypto -lboost_system -lboost_thread-mt -lboost_chrono-mt 
-INCLUDES = 
+LDFLAGS = -g -lssl -lcrypto -lboost_system -lboost_thread-mt -lboost_chrono-mt
+INCLUDES =
 
 
 all: simple threaded
@@ -18,4 +18,3 @@ http.o: urldata.h
 .PHONY: clean
 clean:
 	rm *.o simple
-

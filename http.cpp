@@ -119,7 +119,7 @@ void httphand::handle_write_request()
     // Read the response status line.
     asio::async_read_until(socket_, response_, "\r\n",
          [this](const asio::error_code& err, std::size_t bytes)
-         {  
+         {
             if (!err)
             {
                 httphand::handle_read_status_line();
