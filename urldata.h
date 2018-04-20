@@ -9,10 +9,10 @@
 // abstract class 
 class protocol {
     public:
-        virtual void setup_connection(struct connectdata *);
-        virtual int connect();
-        virtual void disconnect(struct connectdata *);
+        virtual void connect();
 };
+//        virtual void setup_connection(struct connectdata *);
+  //      virtual void disconnect(struct connectdata *);
 
 // The connectdata struct contains all fields and variables that should be
 // unique for an entire connection
@@ -29,8 +29,9 @@ struct connectdata {
 };
 
 using asio::ip::tcp;
-class httphand /*: public Protocol*/ {
+class httphand /*: public protocol, public std::enable_shared_from_this<httphand>*/ {
   private:
+    asio::signal_set signals_;
     asio::io_service* io_serv;
     tcp::resolver resolver_;
     tcp::socket socket_;
@@ -46,13 +47,14 @@ class httphand /*: public Protocol*/ {
     void handle_read_status_line();//const asio::error_code& err);
     void handle_read_headers();//const asio::error_code& err);
     void handle_read_content();//const asio::error_code& err);
+    void handle_stop();//const asio::error_code& err);
 
   public:
     // constructor
     httphand(asio::io_service& io_service,
     const std::string& server, const std::string& path);
-    // connect function
-    int connect();
+    // connect functions
+    void connect();
 };
 
 #endif /* URLDATA_H */

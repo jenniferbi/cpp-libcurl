@@ -4,11 +4,16 @@ CXXFLAGS = $(INCLUDES) -g -O2 -ftemplate-depth-256 -std=c++14 -DASIO_STANDALONE
 LDFLAGS = -g -lssl -lcrypto -lboost_system -lboost_thread-mt -lboost_chrono-mt 
 INCLUDES = 
 
-simple: http.o
+
+all: simple threaded
+threaded: http.o handle.o
+threaded.o: handle.h urldata.h
+simple: http.o handle.o
 simple.o: handle.h urldata.h 
+handle.o: handle.h urldata.h
 http:
 	g++ -g -O2 -ftemplate-depth-256   -o http http.o -lboost_system -lboost_thread-mt -lboost_chrono-mt
-http.o: 
+http.o: urldata.h
 
 .PHONY: clean
 clean:
