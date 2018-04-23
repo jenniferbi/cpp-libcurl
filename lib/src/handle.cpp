@@ -1,4 +1,3 @@
-
 #include <algorithm>
 #include <iostream>
 #include <istream>
@@ -8,18 +7,20 @@
 #include "urldata.h"
 #include "handle.h"
 
+/*
 using asio::ip::tcp;
 void Easy::perform(){
     asio::io_service io_service;
     httphand h(io_service, "images.metmuseum.org", "/CRDImages/as/original/DP141263.jpg");
-   /* httphand h(io_service, "images.metmuseum.org", "/CRDImages/as/original/DP141051.jpg");
+    httphand h(io_service, "images.metmuseum.org", "/CRDImages/as/original/DP141051.jpg");
     httphand h(io_service, "images.metmuseum.org", "/CRDImages/as/original/DP123282.jpg");
     httphand h(io_service, "images.metmuseum.org", "/CRDImages/as/original/DP140984.jpg");
-    httphand h(io_service, "images.metmuseum.org", "/CRDImages/ep/original/DT1946.jpg");*/
+    httphand h(io_service, "images.metmuseum.org", "/CRDImages/ep/original/DT1946.jpg");
     h.connect();
 //    Protocol * p = new HttpHandle(io_service, "www.boost.org", "/LICENSE_1_0.txt");
 //    p->connect();
 }
+*/
 
 
 // function where we loop through the easy handles
@@ -29,14 +30,14 @@ void do_easy(asio::io_context& io_context, asio::yield_context yield){
     //auto self(shared_from_this());
     asio::io_service io_service;
     for (auto ez : easyhandles){
-        shared_ptr<httphand> new_httphand(new httphand(io_service, 
+        shared_ptr<httphand> new_httphand(new httphand(io_service,
             "images.metmuseum.org", "/CRDImages/as/original/DP141263.jpg"));
         asio::io_context::strand strand_;
         asio::spawn(strand_,
              [this](asio::yield_context yield)
             {
                 new_httphand->connect();
-            });       
+            });
     }
 
 }*/
@@ -50,6 +51,7 @@ void Multi::perform(){
 }
 */
 
+/*
 void Multi::perform(){
     std::vector<std::shared_ptr<asio::thread> > threads;
     std::vector<std::shared_ptr<asio::io_service> > servs;
@@ -69,5 +71,5 @@ void Multi::perform(){
         threads[i]->join();
         std::cerr << "new join\n";
     }
-}   
-
+}
+*/

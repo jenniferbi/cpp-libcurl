@@ -15,11 +15,11 @@ class Curl {
         virtual void perform() {};
         void _setopt(int a, string b);
         void _setopt(int a, long b);
-        template<typename T, typename... Args> 
+        template<typename T, typename... Args>
         void setOpt(int a, T b, Args... args); // variadic options
         template<typename T>
         void setOpt(int a, T b); // only two args
-        shared_ptr<UserDefined> defs; 
+        shared_ptr<UserDefined> defs;
 };
 
 
@@ -39,7 +39,7 @@ class Multi : public Curl {
         //void cleanup() override;
     private:
         size_t thread_pool_size = 2;
-        vector<shared_ptr<httphand> > easy_transfers; 
+        vector<shared_ptr<httphand> > easy_transfers;
 };
 
 
@@ -117,7 +117,7 @@ void Multi::perform(){
         threads[i]->join();
         std::cerr << "new join\n";
     }
-}   
+}
 
 
 #endif /* HANDLE_H */
