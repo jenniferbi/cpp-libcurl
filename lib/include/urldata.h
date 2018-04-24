@@ -38,10 +38,18 @@ struct UserDefined {
     std::string url;
     std::string path;
     long timeout;
-    long use_port;
-    long httpversion;
+    long use_port; /* TODO */
+    long httpversion; /* TODO */
     long max_filesize; /* bytes*/
 };
+
+// helper functions
+// must be inlined if used in callback in any handle, since those are in header file
+inline void print_timeout(long ms)
+{
+    std::cerr << "Operation timed out after " << ms << "ms\n";
+}
+
 
 using asio::ip::tcp;
 class httphand /*: public protocol, public std::enable_shared_from_this<httphand>*/ {

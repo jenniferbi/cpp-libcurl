@@ -33,7 +33,7 @@ class Easy : public Curl {
 
 class Multi : public Curl {
     public:
-       // void initialize() override;
+        Multi();
         void perform() override;
        // void setOpt() override; // variadic options
         //void cleanup() override;
@@ -49,7 +49,7 @@ void Curl::_setopt(int a, long b) {
         defs->use_port = b;
         break;
     case CURLPP_OPT_TIMEOUT:
-        defs->use_port = b;
+        defs->timeout = b;
         break;
     default: std::cerr << "Error: CURLPP_OPT not yet supported" << "\n";
     }
@@ -86,16 +86,35 @@ Easy::Easy(){
 }
 void Easy::perform(){
     asio::io_service io_service;
+
     if (defs->url.empty()){
         cerr << "Empty url\n";
         return;
     }
+
+    // set timeout
+    if (defs->timeout > 0){
+        long to = defs->timeout;
+        std::cerr << "timeout is set to " << to << "\n";
+        asio::steady_timer t(io_service, asio::chrono::milliseconds(to));
+        t.async_wait([to, &io_service](const asio::error_code& e)
+                    {   print_timeout(to);
+                        io_service.stop();
+                    });
+        cerr << "returned frmo async_wait\n";
+    }
+
     httphand h(io_service, defs->url, defs->path);
     h.connect();
+    io_service.restart();
 //    Protocol * p = new HttpHandle(io_service, "www.boost.org", "/LICENSE_1_0.txt");
 //    p->connect();
 }
 
+Multi::Multi(){
+    //UserDefined *d = new UserDefined();
+    defs = std::make_shared<UserDefined>();
+}
 
 
 void Multi::perform(){
