@@ -37,10 +37,10 @@ struct connectdata {
 struct UserDefined {
     std::string url;
     std::string path;
-    long timeout;
+    long timeout = -1;
     long use_port; /* TODO */
     long httpversion; /* TODO */
-    long max_filesize; /* bytes*/
+    long maxfile = -1; /* bytes*/
 };
 
 // helper functions
@@ -56,11 +56,9 @@ class httphand /*: public protocol, public std::enable_shared_from_this<httphand
   private:
     asio::signal_set signals_;
     asio::io_service* io_serv;
-    tcp::resolver resolver_;
     tcp::socket socket_;
     asio::streambuf request_;
     asio::streambuf response_;
-    unsigned long long max_timeout;
     // member fns
     void handle_resolve(const asio::error_code& err,
         tcp::resolver::iterator endpoint_iterator);
@@ -74,8 +72,10 @@ class httphand /*: public protocol, public std::enable_shared_from_this<httphand
 
   public:
     // constructor
+    tcp::resolver resolver_;
     httphand(asio::io_service& io_service,
-    const std::string& server, const std::string& path);
+    const std::string& server, const std::string& path,
+    const std::size_t maxsize);
     // connect functions
     void connect();
 };

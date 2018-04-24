@@ -28,6 +28,8 @@ class Easy : public Curl {
         Easy(); // initialize UserDefined and other shared objects
         void perform() override;
         //void setOpt() override; // variadic options
+    private:
+         asio::steady_timer * timer;
 };
 
 
@@ -50,6 +52,9 @@ void Curl::_setopt(int a, long b) {
         break;
     case CURLPP_OPT_TIMEOUT:
         defs->timeout = b;
+        break;
+    case CURLPP_OPT_MAXFILE:
+        defs->maxfile = b;
         break;
     default: std::cerr << "Error: CURLPP_OPT not yet supported" << "\n";
     }
@@ -84,8 +89,10 @@ Easy::Easy(){
     //UserDefined *d = new UserDefined();
     defs = std::make_shared<UserDefined>();
 }
+
 void Easy::perform(){
     asio::io_service io_service;
+    std::size_t maxfile = std::numeric_limits< std::size_t >::max();
 
     if (defs->url.empty()){
         cerr << "Empty url\n";
@@ -96,17 +103,19 @@ void Easy::perform(){
     if (defs->timeout > 0){
         long to = defs->timeout;
         std::cerr << "timeout is set to " << to << "\n";
-        asio::steady_timer t(io_service, asio::chrono::milliseconds(to));
-        t.async_wait([to, &io_service](const asio::error_code& e)
+        timer = new asio::steady_timer(io_service, asio::chrono::seconds(to));
+        timer->async_wait([to, &io_service](const asio::error_code& e)
                     {   print_timeout(to);
                         io_service.stop();
                     });
         cerr << "returned frmo async_wait\n";
     }
-
-    httphand h(io_service, defs->url, defs->path);
+    if (defs->maxfile > 0)
+        maxfile = defs->maxfile;
+    httphand h(io_service, defs->url, defs->path, maxfile);
     h.connect();
     io_service.restart();
+    delete timer;
 //    Protocol * p = new HttpHandle(io_service, "www.boost.org", "/LICENSE_1_0.txt");
 //    p->connect();
 }
@@ -118,13 +127,14 @@ Multi::Multi(){
 
 
 void Multi::perform(){
+    std::size_t maxfile = std::numeric_limits< std::size_t >::max();
     std::vector<std::shared_ptr<asio::thread> > threads;
     std::vector<std::shared_ptr<asio::io_service> > servs;
 //    for (std::size_t i= 0; i < thread_pool_size; ++i){
     for (std::size_t i= 0; i < thread_pool_size; ++i){
         std::shared_ptr<asio::io_service> serv(new asio::io_service());
         servs.push_back(serv);
-        std::shared_ptr<httphand> h(new httphand(*serv, "images.metmuseum.org", "/CRDImages/as/original/DP141263.jpg"));
+        std::shared_ptr<httphand> h(new httphand(*serv, defs->url, defs->path, maxfile));
         easy_transfers.push_back(h);
     }
     for (auto h : easy_transfers){

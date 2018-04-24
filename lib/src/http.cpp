@@ -17,18 +17,12 @@
 using asio::ip::tcp;
 
 httphand::httphand(asio::io_service& io_service,
-      const std::string& server, const std::string& path)
+      const std::string& server, const std::string& path, const std::size_t maxsize)
     : resolver_(io_service), socket_(io_service), 
-      signals_(io_service, SIGINT, SIGTERM) // init list
+      signals_(io_service, SIGINT, SIGTERM),
+      response_(maxsize) // init list
 {
     io_serv = &io_service;
-
-/*    signals_.async_wait(
-        [this](const asio::error_code& err, int signo)
-        {   
-            if (!err) httphand::handle_stop();
-        });*/
-            
     // Form the request. We specify the "Connection: close" header so that the
     // server will close the socket after transmitting the response. This will
     // allow us to treat all data up until the EOF as the content.
@@ -57,7 +51,6 @@ httphand::httphand(asio::io_service& io_service,
 void httphand::handle_stop()
 {
     io_serv->stop();
-    //io_serv->reset();
 }
 
 void httphand::handle_resolve(const asio::error_code& err, tcp::resolver::iterator endpoint_iterator)
