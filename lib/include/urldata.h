@@ -7,9 +7,21 @@
 #ifndef URLDATA_H
 #define URLDATA_H
 // abstract class
+using asio::ip::tcp;
 class protocol {
     public:
-        virtual void connect();
+    // member fns, all pure virtual
+    virtual void handle_connect(const asio::error_code& err,
+        tcp::resolver::iterator endpoint_iterator) = 0;
+    virtual void handle_resolve(const asio::error_code& err,
+        tcp::resolver::iterator endpoint_iterator) = 0;
+    virtual void handle_write_request() = 0;//const asio::error_code& err);
+    virtual void handle_read_status_line() = 0;//const asio::error_code& err);
+    virtual void handle_read_headers() = 0;//const asio::error_code& err);
+    virtual void handle_read_content() = 0;//const asio::error_code& err);
+    virtual void handle_stop() = 0;//const asio::error_code& err);
+
+        virtual void connect()=0;
 };
 //        virtual void setup_connection(struct connectdata *);
   //      virtual void disconnect(struct connectdata *);
@@ -34,13 +46,15 @@ struct connectdata {
 #define CURLPP_OPT_VERSION 103
 #define CURLPP_OPT_MAXFILE 104
 #define CURLPP_OPT_TIMEOUT 105
-struct UserDefined {
+#define CURLPP_OPT_SSLCERT 106
+struct UserDefined : std::enable_shared_from_this<UserDefined>{
     std::string url;
     std::string path;
     long timeout = -1;
     long use_port; /* TODO */
     long httpversion; /* TODO */
-    long maxfile = -1; /* bytes*/
+    std::size_t maxfile = -1; /* bytes*/
+    std::string clientcert;
 };
 
 // helper functions
@@ -51,8 +65,7 @@ inline void print_timeout(long ms)
 }
 
 
-using asio::ip::tcp;
-class httphand /*: public protocol, public std::enable_shared_from_this<httphand>*/ {
+class httphand : public protocol/*, public std::enable_shared_from_this<httphand>*/ {
   private:
     asio::signal_set signals_;
     asio::io_service* io_serv;
