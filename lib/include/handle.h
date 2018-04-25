@@ -102,6 +102,10 @@ void Easy::perform(){
         return;
     }
 
+	if(defs->path.empty())
+	{
+        defs->path = static_cast<string>("/");
+	}
     // set timeout
     if (defs->timeout > 0){
         long to = defs->timeout;
