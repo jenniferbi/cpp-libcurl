@@ -95,6 +95,7 @@ Easy::Easy(){
 
 void Easy::perform(){
     asio::io_service io_service;
+    asio::io_context io_context;
     std::size_t maxfile = std::numeric_limits< std::size_t >::max();
 
     if (defs->url.empty()){
@@ -116,7 +117,9 @@ void Easy::perform(){
     if (defs->maxfile > 0)
         maxfile = defs->maxfile;
     if (!defs->clientcert.empty()){
-//        sslhand h(io_service, defs->url, defs->path, maxfile, defs->clientcert);
+        std::cerr << defs->clientcert << "\n";
+        sslhand h(io_context, defs->url, defs->path, maxfile, defs->clientcert);
+        h.connect();
     }
     else {
         httphand h(io_service, defs->url, defs->path, maxfile);
@@ -137,7 +140,6 @@ void Multi::perform(){
     std::size_t maxfile = std::numeric_limits< std::size_t >::max();
     std::vector<std::shared_ptr<asio::thread> > threads;
     std::vector<std::shared_ptr<asio::io_service> > servs;
-//    for (std::size_t i= 0; i < thread_pool_size; ++i){
     for (std::size_t i= 0; i < thread_pool_size; ++i){
         std::shared_ptr<asio::io_service> serv(new asio::io_service());
         servs.push_back(serv);
