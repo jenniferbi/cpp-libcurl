@@ -6,8 +6,8 @@ int main(void)
 {
 
     Multi myhandle;
+    myhandle.setOpt(CURLPP_OPT_URL, "wwww.columbia.edu/cu/bulletin/uwb/");
     myhandle.perform();
 
-
-  return 0;
+    return 0;
 }

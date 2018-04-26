@@ -20,7 +20,7 @@ httphand::httphand(asio::io_service& io_service,
       const std::string& server, const std::string& path, const std::size_t maxsize,
       std::function<int(const unsigned char *, std::size_t)>& fw,
       std::function<int(const unsigned char *, std::size_t)>& fr)
-    : resolver_(io_service), socket_(io_service), 
+    : resolver_(io_service), socket_(io_service),
       signals_(io_service, SIGINT, SIGTERM),
       response_(maxsize), writeback(fw), readback(fr) // init list
 {
@@ -58,7 +58,7 @@ void httphand::handle_stop()
 
 void httphand::handle_resolve(const asio::error_code& err, tcp::resolver::iterator endpoint_iterator)
 {
-    std::cerr << "handle_resolve\n";
+    //std::cerr << "handle_resolve\n";
       // Attempt a connection to the first endpoint in the list. Each endpoint
       // will be tried until we successfully establish a connection.
     asio::async_connect(socket_, endpoint_iterator,
@@ -66,7 +66,7 @@ void httphand::handle_resolve(const asio::error_code& err, tcp::resolver::iterat
          {
             if(!err)
             {
-                std::cerr << "handle_connect lambda\n";
+                // std::cerr << "handle_connect lambda\n";
                 httphand::handle_connect(err, ++endpoint_iterator);
             }
             else
@@ -79,8 +79,8 @@ void httphand::handle_resolve(const asio::error_code& err, tcp::resolver::iterat
 
 void httphand::handle_connect(const asio::error_code& err,
     tcp::resolver::iterator endpoint_iterator)
-{   
-  std::cerr << "in connect\n";
+{
+    // std::cerr << "in connect\n";
   if (!err)
   {
   //  std::cerr << "successful connection\n";
@@ -111,7 +111,7 @@ void httphand::handle_connect(const asio::error_code& err,
 
 void httphand::handle_write_request()
 {
-    std::cerr << "handle_write_request\n";
+    // std::cerr << "handle_write_request\n";
     // Read the response status line.
     asio::async_read_until(socket_, response_, "\r\n",
          [this](const asio::error_code& err, std::size_t bytes)
@@ -129,7 +129,7 @@ void httphand::handle_write_request()
 
 void httphand::handle_read_status_line()
 {
-     std::cerr << "handle_read_status_line\n";
+    // std::cerr << "handle_read_status_line\n";
     // Check that response is OK.
     std::istream response_stream(&response_);
     std::string http_version;
@@ -145,8 +145,8 @@ void httphand::handle_read_status_line()
     }
     if (status_code != 200)
     {
-      std::cerr << "Response returned with status code ";
-      std::cerr << status_code << "\n";
+      // std::cerr << "Response returned with status code ";
+      // std::cerr << status_code << "\n";
       return;
     }
 
@@ -170,14 +170,16 @@ void httphand::handle_read_headers()
     // Process the response headers.
     std::istream response_stream(&response_);
     std::string header;
-    while (std::getline(response_stream, header) && header != "\r")
-      std::cerr << header << "\n";
-    std::cerr << "\n";
+    while (std::getline(response_stream, header) && header != "\r") {
+        // std::cerr << header << "\n";
+    }
+    // std::cerr << "\n";
+
     // Write whatever content we already have to output.
     if (response_.size() > 0){
       if (writeback){
         const unsigned char * p = asio::buffer_cast<const unsigned char *>(response_.data());
-        writeback(p, response_.size()); 
+        writeback(p, response_.size());
       }
       else
         std::cout << &response_;
@@ -204,7 +206,7 @@ void httphand::handle_read_content()
     // Write all of the data that has been read so far.
       if (writeback){
         const unsigned char * p = asio::buffer_cast<const unsigned char *>(response_.data());
-        writeback(p, response_.size()); 
+        writeback(p, response_.size());
       }
       else
         std::cout << &response_;
@@ -214,7 +216,7 @@ void httphand::handle_read_content()
         asio::transfer_at_least(1),
          [this](const asio::error_code& err, std::size_t bytes)
          {
-            if (!err) 
+            if (!err)
             {
                 httphand::handle_read_content();
             }

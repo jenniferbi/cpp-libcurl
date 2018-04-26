@@ -34,7 +34,8 @@
 
 int main(void)
 {
-    std::string url_name="https://images.metmuseum.org/CRDImages/dp/web-large/DP875552.jpg";
+    //std::string url_name= "https://images.metmuseum.org/CRDImages/as/original/DP141263.jpg";
+    std::string url_name="http://images.cocodataset.org/zips/val2014.zip";
     std::size_t pos = url_name.find_last_of("/");
     std::string filename="./results/simple_c_";
     filename.append(url_name.substr(pos+1));
@@ -52,8 +53,6 @@ int main(void)
     curl = curl_easy_init();
     if(curl) {
         curl_easy_setopt(curl, CURLOPT_URL, c_url_name);
-        /* example.com is redirected, so we tell libcurl to follow redirection */
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
         /* Perform the request, res will get the return code */
         res = curl_easy_perform(curl);

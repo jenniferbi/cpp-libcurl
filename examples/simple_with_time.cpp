@@ -8,14 +8,18 @@
 
 int main(void)
 {
-    std::ofstream output_file {"./results/simple.txt", std::ios_base::app};
-    // Not sure if we want to print out all these time values
+    //std::string url_name  ("http://images.metmuseum.org/CRDImages/as/original/DP141263.jpg");
+    std::string url_name="https://images.cocodataset.org/zips/val2014.zip";
+    std::size_t pos = url_name.find_last_of("/");
+    std::string filename="./results/simple_";
+    filename.append(url_name.substr(pos+1));
+    filename.append(".txt");
+    std::ofstream output_file {filename, std::ios_base::app};
     boost::timer::auto_cpu_timer t(output_file, "%w\n");
 
     Easy myhandle;
-    myhandle.setOpt(CURLPP_OPT_URL, "images.metmuseum.org",
-                    CURLPP_OPT_PATH, "/CRDImages/as/original/DP141263.jpg",
-                    CURLPP_OPT_TIMEOUT, 1000
+    myhandle.setOpt(CURLPP_OPT_URL, url_name,
+                    CURLPP_OPT_SSLCERT, "ca.pem"
         );
 
     myhandle.perform();

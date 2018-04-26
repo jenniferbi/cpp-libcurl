@@ -17,10 +17,11 @@
 
 using asio::ip::tcp;
 
-sslhand::sslhand(asio::io_service& io_service, 
+sslhand::sslhand(asio::io_service& io_service,
       const std::string& server, const std::string& path, const std::size_t maxsize, const std::string& cert)
-    : resolver_(io_service), ctx_(asio::ssl::context::tls_client),
-      socket_(io_service, ctx_), 
+    : resolver_(io_service), ctx_(asio::ssl::context::sslv23),
+      socket_(io_service, ctx_),
+
       response_(maxsize)// init list
 {
     ctx_.set_default_verify_paths();
@@ -37,7 +38,7 @@ sslhand::sslhand(asio::io_service& io_service,
     request_stream << "Connection: close\r\n\r\n";
     // Start an asynchronous resolve to translate the server and service names
     // into a list of endpoints.
-    tcp::resolver::query query(server, "https"); 
+    tcp::resolver::query query(server, "https");
 
     resolver_.async_resolve(query,
         [this](const asio::error_code& err, tcp::resolver::iterator endpoint_iterator)
@@ -63,20 +64,20 @@ bool sslhand::verify_certificate(bool preverified, asio::ssl::verify_context& ct
     char subject_name[256];
     X509* cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
     X509_NAME_oneline(X509_get_subject_name(cert), subject_name, 256);
-    std::cout << "Verifying " << subject_name << "\n";
+    //std::cerr << "Verifying " << subject_name << "\n";
 
     return preverified;
 }
 
 void sslhand::handle_resolve(const asio::error_code& err, tcp::resolver::iterator endpoint_iterator)
 {
-    std::cerr << "handle_resolve\n";
+    // std::cerr << "handle_resolve\n";
     // begin verification
     socket_.set_verify_mode(asio::ssl::verify_peer);
     socket_.set_verify_callback(
         [this](bool preverified, asio::ssl::verify_context& ctx)
         {
-            return sslhand::verify_certificate(preverified, ctx);   
+            return sslhand::verify_certificate(preverified, ctx);
         }
         );
 
@@ -87,7 +88,7 @@ void sslhand::handle_resolve(const asio::error_code& err, tcp::resolver::iterato
          {
             if(!err)
             {
-                std::cerr << "handle_connect lambda\n";
+                // std::cerr << "handle_connect lambda\n";
                 sslhand::handle_connect(err, endpoint_iterator);
             }
             else
@@ -100,9 +101,9 @@ void sslhand::handle_resolve(const asio::error_code& err, tcp::resolver::iterato
 
 void sslhand::handle_connect(const asio::error_code& err, tcp::resolver::iterator endpoint_iterator)
 {
-  std::cerr << "in connect\n";
+    // std::cerr << "in connect\n";
   if(!err){
-  std::cerr << "about to handshake\n";
+      // std::cerr << "about to handshake\n";
      socket_.async_handshake(asio::ssl::stream_base::client,
       [this](const asio::error_code& err)
       {
@@ -124,12 +125,12 @@ void sslhand::handle_connect(const asio::error_code& err, tcp::resolver::iterato
     }
 }
 void sslhand::handle_handshake(const asio::error_code& err)
-{   
+{
     if(!err){
     // The connection was successful. Send the request.
-    std::cerr << "in handshake\n";
+    // std::cerr << "in handshake\n";
     const char* header=asio::buffer_cast<const char*>(request_.data());
-    std::cout << header << "\n";
+    // std::cerr << header << "\n";
     asio::async_write(socket_, request_,
          [this](const asio::error_code& err, std::size_t bytes)
          {
@@ -144,7 +145,7 @@ void sslhand::handle_write_request(const asio::error_code& err)
 {
     if (!err)
     {
-    std::cerr << "handle_write_request\n";
+        // std::cerr << "handle_write_request\n";
     // Read the response status line.
     asio::async_read_until(socket_, response_, "\r\n",
          [this](const asio::error_code& err, std::size_t bytes)
@@ -160,7 +161,7 @@ void sslhand::handle_write_request(const asio::error_code& err)
 
 void sslhand::handle_read_status_line()
 {
-     std::cerr << "handle_read_status_line\n";
+    // std::cerr << "handle_read_status_line\n";
     // Check that response is OK.
     std::istream response_stream(&response_);
     std::string http_version;
@@ -201,9 +202,9 @@ void sslhand::handle_read_headers()
     // Process the response headers.
     std::istream response_stream(&response_);
     std::string header;
-    while (std::getline(response_stream, header) && header != "\r")
-      std::cerr << header << "\n";
-    std::cerr << "\n";
+    while (std::getline(response_stream, header) && header != "\r");
+        //std::cerr << header << "\n";
+    //std::cerr << "\n";
 
     // Write whatever content we already have to output.
     if (response_.size() > 0)
@@ -241,7 +242,8 @@ void sslhand::handle_read_content()
             }
             else
             {
-                std::cerr << "Error: " << err.message() << "\n";
+                // suppressing errors here might not be best ~~~~
+                // std::cerr << "Error: " << err.message() << "\n";
             }
 
          });

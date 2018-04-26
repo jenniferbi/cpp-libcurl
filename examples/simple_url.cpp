@@ -7,7 +7,8 @@ int main(int argc, char** argv)
     std::string url (argv[1]);
     Easy myhandle;
     myhandle.setOpt(CURLPP_OPT_URL, url,
-      CURLPP_OPT_TIMEOUT, 1000
+                    //CURLPP_OPT_TIMEOUT, 1000
+                    CURLPP_OPT_SSLCERT, "ca.pem"
         );
 
     myhandle.perform();

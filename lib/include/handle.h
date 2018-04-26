@@ -40,7 +40,7 @@ class Multi : public Curl {
         Multi();
         void perform() override;
     private:
-        size_t thread_pool_size = 2;
+        size_t thread_pool_size = 10;
         vector<shared_ptr<httphand> > easy_transfers;
 };
 
@@ -48,6 +48,7 @@ void Curl::parse_url(string url) {
     size_t pos = url.find("://");
     if (pos != string::npos) {
         string scheme (url.substr(0, pos));
+        //cerr << scheme << "\n";
         if (scheme.compare("http") == 0) {
         }
         else if (scheme.compare("https") == 0) {
@@ -148,25 +149,25 @@ void Easy::perform(){
     // set timeout
     if (defs->timeout > 0){
         long to = defs->timeout;
-        std::cerr << "timeout is set to " << to << "\n";
+        // std::cerr << "timeout is set to " << to << "\n";
         timer = new asio::steady_timer(io_service, asio::chrono::seconds(to));
         timer->async_wait([to, &io_service](const asio::error_code& e)
                     {   print_timeout(to);
                         io_service.stop();
                     });
-        cerr << "returned frmo async_wait\n";
+        // cerr << "returned frmo async_wait\n";
     }
     if (defs->maxfile > 0)
         maxfile = defs->maxfile;
     if (defs->scheme == CURLPP_OPT_HTTPS && !defs->clientcert.empty()){
-        std::cerr << defs->clientcert << "\n";
+        //std::cerr << defs->clientcert << "\n";
         sslhand h(io_service, defs->host, defs->path, maxfile, defs->clientcert);
         h.connect();
     }
     else if (defs->scheme == CURLPP_OPT_HTTP) {
-        httphand h(io_service, defs->host, defs->path, 
+        httphand h(io_service, defs->host, defs->path,
                 maxfile, defs->writeback, defs->readback);
-        
+
         h.connect();
     }
     io_service.restart();
@@ -192,9 +193,11 @@ void Multi::perform(){
     for (auto h : easy_transfers){
         std::shared_ptr<asio::thread> thread(new asio::thread([&h](){ h->connect(); }));
         threads.push_back(thread);
+        // std::cerr << "new thread who dis\n";
     }
     for (std::size_t i = 0; i < threads.size(); ++i){
         threads[i]->join();
+        // std::cerr << "new join\n";
     }
 }
 
