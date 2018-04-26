@@ -28,19 +28,24 @@ struct connectdata {
 
 };
 
-#define CURLPP_OPT_URL    100
+#define CURLPP_OPT_URL 99
+#define CURLPP_OPT_HOST 100
 #define CURLPP_OPT_PATH   101
 #define CURLPP_OPT_PORT   102
 #define CURLPP_OPT_VERSION 103
 #define CURLPP_OPT_MAXFILE 104
 #define CURLPP_OPT_TIMEOUT 105
+
+#define CURLPP_OPT_HTTP 200
+#define CURLPP_OPT_HTTPS 201
 struct UserDefined {
-    std::string url;
+    std::string host;
     std::string path;
     long timeout = -1;
     long use_port; /* TODO */
     long httpversion; /* TODO */
     long maxfile = -1; /* bytes*/
+    int scheme = CURLPP_OPT_HTTP;
 };
 
 // helper functions
