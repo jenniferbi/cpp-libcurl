@@ -51,8 +51,9 @@ struct connectdata {
 #define CURLPP_OPT_TIMEOUT 105
 #define CURLPP_OPT_SSLCERT 106
 
-#define CURLPP_OPT_HTTP 200
-#define CURLPP_OPT_HTTPS 201
+#define CURLPP_OPT_SCHEME 200
+#define CURLPP_OPT_HTTP 201
+#define CURLPP_OPT_HTTPS 202
 #define CURLPP_OPT_NOT_SUPPORTED 250
 struct UserDefined : std::enable_shared_from_this<UserDefined>{
     std::string host;

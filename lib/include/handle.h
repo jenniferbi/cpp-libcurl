@@ -84,6 +84,7 @@ void Curl::_setopt(int a, long b) {
         break;
     case CURLPP_OPT_SCHEME:
         defs->scheme = b;
+        break;
     default: std::cerr << "Error: CURLPP_OPT not yet supported" << "\n";
     }
 }
