@@ -147,10 +147,12 @@ void Easy::perform(){
     }
     if (defs->maxfile > 0)
         maxfile = defs->maxfile;
-    if (!defs->clientcert.empty()){
-//        sslhand h(io_service, defs->url, defs->path, maxfile, defs->clientcert);
+    if (defs->scheme == CURLPP_OPT_HTTPS && !defs->clientcert.empty()){
+        std::cerr << defs->clientcert << "\n";
+        sslhand h(io_service, defs->host, defs->path, maxfile, defs->clientcert);
+        h.connect();
     }
-    else {
+    else if (defs->scheme == CURLPP_OPT_HTTP) {
         httphand h(io_service, defs->host, defs->path, maxfile);
         h.connect();
     }
@@ -169,7 +171,6 @@ void Multi::perform(){
     std::size_t maxfile = std::numeric_limits< std::size_t >::max();
     std::vector<std::shared_ptr<asio::thread> > threads;
     std::vector<std::shared_ptr<asio::io_service> > servs;
-//    for (std::size_t i= 0; i < thread_pool_size; ++i){
     for (std::size_t i= 0; i < thread_pool_size; ++i){
         std::shared_ptr<asio::io_service> serv(new asio::io_service());
         servs.push_back(serv);
