@@ -2,12 +2,11 @@
 #include "handle.h"
 #include "urldata.h"
 
-int main(void)
+int main(int argc, char** argv)
 {
-
+    std::string url (argv[1]);
     Easy myhandle;
-    myhandle.setOpt(CURLPP_OPT_HOST, "images.metmuseum.org",
-      CURLPP_OPT_PATH, "/CRDImages/as/original/DP141263.jpg",
+    myhandle.setOpt(CURLPP_OPT_URL, url,
       CURLPP_OPT_TIMEOUT, 1000
         );
 
