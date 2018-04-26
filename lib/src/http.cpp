@@ -13,7 +13,7 @@
 #include <ostream>
 #include <string>
 #include <asio.hpp>
-
+//#include <error_code.hpp>
 using asio::ip::tcp;
 
 httphand::httphand(asio::io_service& io_service,
@@ -201,7 +201,7 @@ void httphand::handle_read_content()
         asio::transfer_at_least(1),
          [this](const asio::error_code& err, std::size_t bytes)
          {
-            if (!err)
+            if (!err || err.value() == 2) 
             {
                 httphand::handle_read_content();
             }

@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <iostream>
 #include <istream>
+#include <memory>
 #include <ostream>
 #include <vector>
 #include <string>
@@ -96,6 +97,9 @@ void Curl::_setopt(int a, string b) {
     case CURLPP_OPT_PATH:
         defs->path = static_cast<string>(b);
         break;
+    case CURLPP_OPT_SSLCERT:
+        defs->clientcert = static_cast<string>(b);
+        break;
     default: std::cerr << "Error: CURLPP_OPT not yet supported" << "\n";
     }
 }
@@ -112,7 +116,6 @@ void Curl::setOpt(int a, T b, Args... args) {
 
 using asio::ip::tcp;
 Easy::Easy(){
-    //UserDefined *d = new UserDefined();
     defs = std::make_shared<UserDefined>();
 }
 
@@ -125,6 +128,10 @@ void Easy::perform(){
         return;
     }
 
+	if(defs->path.empty())
+	{
+        defs->path = static_cast<string>("/");
+	}
     // set timeout
     if (defs->timeout > 0){
         long to = defs->timeout;
@@ -138,12 +145,16 @@ void Easy::perform(){
     }
     if (defs->maxfile > 0)
         maxfile = defs->maxfile;
-    httphand h(io_service, defs->host, defs->path, maxfile);
-    h.connect();
+    if (!defs->clientcert.empty()){
+//        sslhand h(io_service, defs->url, defs->path, maxfile, defs->clientcert);
+    }
+    else {
+        httphand h(io_service, defs->host, defs->path, maxfile);
+        h.connect();
+    }
     io_service.restart();
-    delete timer;
-//    Protocol * p = new HttpHandle(io_service, "www.boost.org", "/LICENSE_1_0.txt");
-//    p->connect();
+    if (timer)
+        delete timer;
 }
 
 Multi::Multi(){
