@@ -16,7 +16,8 @@ class protocol {
         tcp::resolver::iterator endpoint_iterator) = 0;
     virtual void handle_resolve(const asio::error_code& err,
         tcp::resolver::iterator endpoint_iterator) = 0;
-    virtual void handle_write_request() = 0;//const asio::error_code& err);
+    virtual void handle_write_request(){};//const asio::error_code& err);
+    virtual void handle_write_request(const asio::error_code& err){};
     virtual void handle_read_status_line() = 0;//const asio::error_code& err);
     virtual void handle_read_headers() = 0;//const asio::error_code& err);
     virtual void handle_read_content() = 0;//const asio::error_code& err);
@@ -95,7 +96,7 @@ class httphand : public protocol/*, public std::enable_shared_from_this<httphand
 };
 class sslhand : public protocol/*, public std::enable_shared_from_this<httphand>*/ {
   private:
-    asio::io_context* io_ctx;
+    asio::io_service* io_serv;
     asio::ssl::context ctx_;
     asio::ssl::stream<asio::ip::tcp::socket> socket_;
     asio::streambuf request_;
@@ -108,16 +109,16 @@ class sslhand : public protocol/*, public std::enable_shared_from_this<httphand>
         tcp::resolver::iterator endpoint_iterator);
     void handle_handshake(const asio::error_code& err,
         tcp::resolver::iterator endpoint_iterator);
-    void handle_write_request();//const asio::error_code& err);
+    void handle_write_request(const asio::error_code& err);
     void handle_read_status_line();//const asio::error_code& err);
     void handle_read_headers();//const asio::error_code& err);
     void handle_read_content();//const asio::error_code& err);
     void handle_stop();//const asio::error_code& err);
-    void handle_handshake();//const asio::error_code& err);
+    void handle_handshake(const asio::error_code& err);
     bool verify_certificate(bool preverified, asio::ssl::verify_context& ctx);
   public:
     // constructor
-    sslhand(asio::io_context& io_context,
+    sslhand(asio::io_service& io_service,
     const std::string& server, const std::string& path,
     const std::size_t maxsize, const std::string& cert);
     // connect functions

@@ -95,7 +95,6 @@ Easy::Easy(){
 
 void Easy::perform(){
     asio::io_service io_service;
-    asio::io_context io_context;
     std::size_t maxfile = std::numeric_limits< std::size_t >::max();
 
     if (defs->url.empty()){
@@ -118,7 +117,7 @@ void Easy::perform(){
         maxfile = defs->maxfile;
     if (!defs->clientcert.empty()){
         std::cerr << defs->clientcert << "\n";
-        sslhand h(io_context, defs->url, defs->path, maxfile, defs->clientcert);
+        sslhand h(io_service, defs->url, defs->path, maxfile, defs->clientcert);
         h.connect();
     }
     else {
