@@ -16,6 +16,7 @@ class Curl {
         virtual void perform() {};
         void _setopt(int a, string b);
         void _setopt(int a, long b);
+        void _setopt(int a, std::function<int(const unsigned char *, std::size_t)> f);
         template<typename T, typename... Args>
         void setOpt(int a, T b, Args... args); // variadic options
         template<typename T>
@@ -29,7 +30,6 @@ class Easy : public Curl {
     public:
         Easy(); // initialize UserDefined and other shared objects
         void perform() override;
-        //void setOpt() override; // variadic options
     private:
          asio::steady_timer * timer;
 };
@@ -39,8 +39,6 @@ class Multi : public Curl {
     public:
         Multi();
         void perform() override;
-       // void setOpt() override; // variadic options
-        //void cleanup() override;
     private:
         size_t thread_pool_size = 2;
         vector<shared_ptr<httphand> > easy_transfers;
@@ -81,6 +79,15 @@ void Curl::_setopt(int a, long b) {
         break;
     case CURLPP_OPT_MAXFILE:
         defs->maxfile = b;
+        break;
+    default: std::cerr << "Error: CURLPP_OPT not yet supported" << "\n";
+    }
+}
+
+void Curl::_setopt(int a, std::function<int(const unsigned char *, std::size_t)> f){
+    switch (a) {
+    case CURLPP_OPT_WRITEFN:
+        defs->writeback = f;
         break;
     default: std::cerr << "Error: CURLPP_OPT not yet supported" << "\n";
     }
@@ -151,7 +158,8 @@ void Easy::perform(){
         h.connect();
     }
     else if (defs->scheme == CURLPP_OPT_HTTP) {
-        httphand h(io_service, defs->host, defs->path, maxfile);
+        httphand h(io_service, defs->host, defs->path, 
+                maxfile, defs->writeback);
         h.connect();
     }
     io_service.restart();
@@ -160,7 +168,6 @@ void Easy::perform(){
 }
 
 Multi::Multi(){
-    //UserDefined *d = new UserDefined();
     defs = std::make_shared<UserDefined>();
 }
 
@@ -172,17 +179,15 @@ void Multi::perform(){
     for (std::size_t i= 0; i < thread_pool_size; ++i){
         std::shared_ptr<asio::io_service> serv(new asio::io_service());
         servs.push_back(serv);
-        std::shared_ptr<httphand> h(new httphand(*serv, defs->host, defs->path, maxfile));
+        std::shared_ptr<httphand> h(new httphand(*serv, defs->host, defs->path, maxfile, defs->writeback));
         easy_transfers.push_back(h);
     }
     for (auto h : easy_transfers){
         std::shared_ptr<asio::thread> thread(new asio::thread([&h](){ h->connect(); }));
         threads.push_back(thread);
-        std::cerr << "new thread who dis\n";
     }
     for (std::size_t i = 0; i < threads.size(); ++i){
         threads[i]->join();
-        std::cerr << "new join\n";
     }
 }
 

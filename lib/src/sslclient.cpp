@@ -19,13 +19,14 @@ using asio::ip::tcp;
 
 sslhand::sslhand(asio::io_service& io_service, 
       const std::string& server, const std::string& path, const std::size_t maxsize, const std::string& cert)
-    : resolver_(io_service), ctx_(asio::ssl::context::sslv23),
+    : resolver_(io_service), ctx_(asio::ssl::context::tls_client),
       socket_(io_service, ctx_), 
       response_(maxsize)// init list
 {
     ctx_.set_default_verify_paths();
     io_serv = &io_service;
- //   ctx_.load_verify_file(cert);
+    ctx_.use_certificate_file(cert, asio::ssl::context::file_format::pem);
+
     // Form the request. We specify the "Connection: close" header so that the
     // server will close the socket after transmitting the response. This will
     // allow us to treat all data up until the EOF as the content.

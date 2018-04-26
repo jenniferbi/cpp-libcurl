@@ -50,6 +50,7 @@ struct connectdata {
 #define CURLPP_OPT_MAXFILE 104
 #define CURLPP_OPT_TIMEOUT 105
 #define CURLPP_OPT_SSLCERT 106
+#define CURLPP_OPT_WRITEFN 107
 
 #define CURLPP_OPT_HTTP 200
 #define CURLPP_OPT_HTTPS 201
@@ -62,6 +63,8 @@ struct UserDefined : std::enable_shared_from_this<UserDefined>{
     std::size_t maxfile = -1; /* bytes*/
     std::string clientcert;
     int scheme = CURLPP_OPT_HTTP;
+    std::function<int(const unsigned char *, std::size_t)> writeback 
+        = [](const unsigned char* s, std::size_t size) { return 0; } ;
 };
 
 // helper functions
@@ -80,6 +83,7 @@ class httphand : public protocol/*, public std::enable_shared_from_this<httphand
     asio::streambuf request_;
     asio::streambuf response_;
     tcp::resolver resolver_;
+    std::function<int(const unsigned char *, std::size_t)>& writeback;
     // member fns
     void handle_resolve(const asio::error_code& err,
         tcp::resolver::iterator endpoint_iterator);
@@ -95,7 +99,7 @@ class httphand : public protocol/*, public std::enable_shared_from_this<httphand
     // constructor
     httphand(asio::io_service& io_service,
     const std::string& server, const std::string& path,
-    const std::size_t maxsize);
+    const std::size_t maxsize, std::function<int(const unsigned char *, std::size_t)>& f);
     // connect functions
     void connect();
 };

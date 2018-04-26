@@ -17,12 +17,14 @@
 using asio::ip::tcp;
 
 httphand::httphand(asio::io_service& io_service,
-      const std::string& server, const std::string& path, const std::size_t maxsize)
+      const std::string& server, const std::string& path, const std::size_t maxsize,
+      std::function<int(const unsigned char *, std::size_t)>& f)
     : resolver_(io_service), socket_(io_service), 
       signals_(io_service, SIGINT, SIGTERM),
-      response_(maxsize) // init list
+      response_(maxsize), writeback(f) // init list
 {
     io_serv = &io_service;
+    //writeback = f;
     // Form the request. We specify the "Connection: close" header so that the
     // server will close the socket after transmitting the response. This will
     // allow us to treat all data up until the EOF as the content.
@@ -170,10 +172,15 @@ void httphand::handle_read_headers()
     while (std::getline(response_stream, header) && header != "\r")
       std::cerr << header << "\n";
     std::cerr << "\n";
-
     // Write whatever content we already have to output.
-    if (response_.size() > 0)
-      std::cout << &response_;
+    if (response_.size() > 0){
+      if (writeback){
+        const unsigned char * p = asio::buffer_cast<const unsigned char *>(response_.data());
+        writeback(p, response_.size()); 
+      }
+      else
+        std::cout << &response_;
+    }
 
     // Start reading remaining data until EOF.
     asio::async_read(socket_, response_,
