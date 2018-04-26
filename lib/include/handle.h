@@ -54,7 +54,7 @@ void Curl::parse_url(string url) {
             defs->scheme = CURLPP_OPT_HTTPS;
         }
         else {
-            //defs->scheme = CURLPP_OPT_NOT_SUPPORTED;
+            defs->scheme = CURLPP_OPT_NOT_SUPPORTED;
             std::cerr << "Error: This scheme is not yet supported. Defaulting to HTTP" << "\n";
         }
         url = url.substr(pos+3);
@@ -79,6 +79,9 @@ void Curl::_setopt(int a, long b) {
         break;
     case CURLPP_OPT_MAXFILE:
         defs->maxfile = b;
+        break;
+    case CURLPP_OPT_SCHEME:
+        defs->scheme = b;
         break;
     default: std::cerr << "Error: CURLPP_OPT not yet supported" << "\n";
     }

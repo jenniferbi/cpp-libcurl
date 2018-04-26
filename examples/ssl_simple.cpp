@@ -6,8 +6,9 @@ int main(void)
 {
 
     Easy myhandle;
-    myhandle.setOpt(CURLPP_OPT_URL, "images.metmuseum.org",
+    myhandle.setOpt(CURLPP_OPT_HOST, "images.metmuseum.org",
       CURLPP_OPT_PATH, "/CRDImages/as/original/DP141263.jpg",
+                    CURLPP_OPT_SCHEME, CURLPP_OPT_HTTPS,
       CURLPP_OPT_SSLCERT, "ca.pem"
     );
 
