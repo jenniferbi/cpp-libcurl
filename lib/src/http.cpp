@@ -201,16 +201,25 @@ void httphand::handle_read_headers()
 void httphand::handle_read_content()
 {
     // Write all of the data that has been read so far.
-    std::cout << &response_;
+      if (writeback){
+        const unsigned char * p = asio::buffer_cast<const unsigned char *>(response_.data());
+        writeback(p, response_.size()); 
+      }
+      else
+        std::cout << &response_;
 
     // Continue reading remaining data until EOF.
     asio::async_read(socket_, response_,
         asio::transfer_at_least(1),
          [this](const asio::error_code& err, std::size_t bytes)
          {
-            if (!err || err.value() == 2) 
+            if (!err) 
             {
                 httphand::handle_read_content();
+            }
+            else if (err.value() == 2)
+            {
+                return;
             }
             else
             {

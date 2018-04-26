@@ -16,7 +16,7 @@ int main(void)
         };
     Easy myhandle;
     myhandle.setOpt(CURLPP_OPT_HOST, "www.columbia.edu",
-      CURLPP_OPT_PATH, "/cu/bulletin/uwb/sel/FILM_Fall2018.html",
+      CURLPP_OPT_PATH, "/cu/bulletin/uwb/sel/COMS_Fall2018.html",
       CURLPP_OPT_WRITEFN, foo);
 
     myhandle.perform();
