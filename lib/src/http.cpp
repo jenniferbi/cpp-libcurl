@@ -18,10 +18,11 @@ using asio::ip::tcp;
 
 httphand::httphand(asio::io_service& io_service,
       const std::string& server, const std::string& path, const std::size_t maxsize,
-      std::function<int(const unsigned char *, std::size_t)>& f)
+      std::function<int(const unsigned char *, std::size_t)>& fw,
+      std::function<int(const unsigned char *, std::size_t)>& fr)
     : resolver_(io_service), socket_(io_service), 
       signals_(io_service, SIGINT, SIGTERM),
-      response_(maxsize), writeback(f) // init list
+      response_(maxsize), writeback(fw), readback(fr) // init list
 {
     io_serv = &io_service;
     //writeback = f;

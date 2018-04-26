@@ -92,6 +92,9 @@ void Curl::_setopt(int a, std::function<int(const unsigned char *, std::size_t)>
     case CURLPP_OPT_WRITEFN:
         defs->writeback = f;
         break;
+    case CURLPP_OPT_READFN:
+        defs->readback = f;
+        break;
     default: std::cerr << "Error: CURLPP_OPT not yet supported" << "\n";
     }
 }
@@ -162,7 +165,8 @@ void Easy::perform(){
     }
     else if (defs->scheme == CURLPP_OPT_HTTP) {
         httphand h(io_service, defs->host, defs->path, 
-                maxfile, defs->writeback);
+                maxfile, defs->writeback, defs->readback);
+        
         h.connect();
     }
     io_service.restart();
@@ -182,7 +186,7 @@ void Multi::perform(){
     for (std::size_t i= 0; i < thread_pool_size; ++i){
         std::shared_ptr<asio::io_service> serv(new asio::io_service());
         servs.push_back(serv);
-        std::shared_ptr<httphand> h(new httphand(*serv, defs->host, defs->path, maxfile, defs->writeback));
+        std::shared_ptr<httphand> h(new httphand(*serv, defs->host, defs->path, maxfile, defs->writeback, defs->readback));
         easy_transfers.push_back(h);
     }
     for (auto h : easy_transfers){
