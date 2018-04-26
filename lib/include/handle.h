@@ -145,12 +145,12 @@ void Easy::perform(){
     }
     if (defs->maxfile > 0)
         maxfile = defs->maxfile;
-    if (!defs->clientcert.empty()){
+    if (defs->scheme == CURLPP_OPT_HTTPS && !defs->clientcert.empty()){
         std::cerr << defs->clientcert << "\n";
-        sslhand h(io_service, defs->url, defs->path, maxfile, defs->clientcert);
+        sslhand h(io_service, defs->host, defs->path, maxfile, defs->clientcert);
         h.connect();
     }
-    else {
+    else if (defs->scheme == CURLPP_OPT_HTTP) {
         httphand h(io_service, defs->host, defs->path, maxfile);
         h.connect();
     }
