@@ -26,9 +26,12 @@ using asio::ip::tcp;
 // sslhand constructor
 sslhand::sslhand(asio::io_service& io_service,
       const std::string& server, const std::string& path, 
-      const std::size_t maxsize, const std::string& cert)
+      const std::size_t maxsize, const std::string& cert,
+      std::function<int(const unsigned char *, std::size_t)>& fw,
+      std::function<int(const unsigned char *, std::size_t)>& fr)
     : resolver_(io_service), ctx_(asio::ssl::context::sslv23),
-      socket_(io_service, ctx_), response_(maxsize) // init list
+      socket_(io_service, ctx_), response_(maxsize),
+      writeback(fw), readback(fr)  // init list
 {
     // setting context
     ctx_.set_default_verify_paths();
@@ -218,8 +221,14 @@ void sslhand::handle_read_headers()
     //std::cerr << "\n";
 
     // Write whatever content we already have to output.
-    if (response_.size() > 0)
-      std::cout << &response_;
+    if (response_.size() > 0){
+      if (writeback){
+        const unsigned char * p = asio::buffer_cast<const unsigned char *>(response_.data());
+        writeback(p, response_.size());
+      }
+      else
+        std::cout << &response_;
+    }
 
     // Start reading remaining data until EOF.
     asio::async_read(socket_, response_,
@@ -240,7 +249,12 @@ void sslhand::handle_read_headers()
 void sslhand::handle_read_content()
 {
     // Write all of the data that has been read so far.
-    std::cout << &response_;
+      if (writeback){
+        const unsigned char * p = asio::buffer_cast<const unsigned char *>(response_.data());
+        writeback(p, response_.size());
+      }
+      else
+        std::cout << &response_;
 
     // Continue reading remaining data until EOF.
     asio::async_read(socket_, response_,

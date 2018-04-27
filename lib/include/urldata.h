@@ -117,6 +117,8 @@ class sslhand : public protocol/*, public std::enable_shared_from_this<httphand>
     asio::streambuf request_;
     tcp::resolver resolver_;
     asio::streambuf response_;
+    std::function<int(const unsigned char *, std::size_t)>& writeback;
+    std::function<int(const unsigned char *, std::size_t)>& readback;
     // member fns
     void handle_resolve(const asio::error_code& err,
         tcp::resolver::iterator endpoint_iterator);
@@ -135,7 +137,9 @@ class sslhand : public protocol/*, public std::enable_shared_from_this<httphand>
     // constructor
     sslhand(asio::io_service& io_service,
     const std::string& server, const std::string& path,
-    const std::size_t maxsize, const std::string& cert);
+    const std::size_t maxsize, const std::string& cert,
+    std::function<int(const unsigned char *, std::size_t)>& fw,
+    std::function<int(const unsigned char *, std::size_t)>& fr);
     // connect functions
     void connect();
 };

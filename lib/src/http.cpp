@@ -25,7 +25,8 @@ using asio::ip::tcp;
 
 //httphand constructor
 httphand::httphand(asio::io_service& io_service,
-      const std::string& server, const std::string& path, const std::size_t maxsize,
+      const std::string& server, const std::string& path,
+      const std::size_t maxsize,
       std::function<int(const unsigned char *, std::size_t)>& fw,
       std::function<int(const unsigned char *, std::size_t)>& fr)
     : resolver_(io_service), socket_(io_service),
