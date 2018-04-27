@@ -39,7 +39,7 @@ int main(int argc, char** argv)
     std::size_t pos = url_name.find_last_of("/");
     std::string filename="./results/simple_c_";
     filename.append(url_name.substr(pos+1));
-    filename.append(".txt");
+    filename.append(".csv");
 
     const char *c_url_name = url_name.c_str();
 

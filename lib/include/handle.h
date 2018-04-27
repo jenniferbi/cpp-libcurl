@@ -56,8 +56,8 @@ class Multi : public Curl {
         Multi();
         ~Multi();
         void perform() override;
-    private:
         size_t thread_pool_size = 10;
+    private:
         vector<shared_ptr<httphand> > easy_transfers;
 };
 
@@ -100,6 +100,9 @@ void Curl::_setopt(int a, long b) {
         break;
     case CURLPP_OPT_SCHEME:
         defs->scheme = b;
+        break;
+    case CURLPP_OPT_THREAD_POOL:
+        dynamic_cast<Multi*>(this)->thread_pool_size = b;
         break;
     default: std::cerr << "Error: CURLPP_OPT not yet supported" << "\n";
     }
