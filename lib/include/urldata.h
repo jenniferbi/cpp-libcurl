@@ -1,3 +1,14 @@
+/********************************************************
+*               __   __  _____  __                     *
+*              / /  / / / / _ \/ /                     *
+*             / _ \/ /_/ / , _/ /__                    *
+*            /_//_/\____/_/|_/____/                    *
+*                                                      *
+* This file contains the class definitions of various  *
+* protocols, all inheriting from virtual class protocol*
+*                                                      *
+********************************************************/
+
 #include <iostream>
 #include <istream>
 #include <ostream>
@@ -7,7 +18,8 @@
 
 #ifndef URLDATA_H
 #define URLDATA_H
-// abstract class
+
+// abstract class defining protocol interface, used by handles
 using asio::ip::tcp;
 class protocol {
     public:
@@ -25,23 +37,8 @@ class protocol {
 
         virtual void connect()=0;
 };
-//        virtual void setup_connection(struct connectdata *);
-  //      virtual void disconnect(struct connectdata *);
 
-// The connectdata struct contains all fields and variables that should be
-// unique for an entire connection
-struct connectdata {
-  //  bool inuse;
-   // long connection_id;
-    // dns_entry is the particular host we use. points to an entry in
-    // DNS cache. Only modified in done(). The entry will be NULL if the
-    // connection is re-used, as then there is no name resolve done.
-   // struct dns_entry * dns_entry;
-    std::string server;
-    std::string path;
-
-};
-
+// options, struct to support options
 #define CURLPP_OPT_URL 99
 #define CURLPP_OPT_HOST 100
 #define CURLPP_OPT_PATH   101
@@ -58,6 +55,7 @@ struct connectdata {
 #define CURLPP_OPT_HTTP 201
 #define CURLPP_OPT_HTTPS 202
 #define CURLPP_OPT_NOT_SUPPORTED 250
+
 struct UserDefined : std::enable_shared_from_this<UserDefined>{
     std::string host;
     std::string path;
@@ -78,7 +76,7 @@ inline void print_timeout(long ms)
     std::cerr << "Operation timed out after " << ms << "ms\n";
 }
 
-
+// each protocol inherits from protocol class
 class httphand : public protocol/*, public std::enable_shared_from_this<httphand>*/ {
   private:
     asio::signal_set signals_;
@@ -111,6 +109,7 @@ class httphand : public protocol/*, public std::enable_shared_from_this<httphand
     // connect functions
     void connect();
 };
+// sslhand class definition
 class sslhand : public protocol/*, public std::enable_shared_from_this<httphand>*/ {
   private:
     asio::io_service* io_serv;

@@ -1,3 +1,15 @@
+/********************************************************
+*               __   __  _____  __                     *
+*              / /  / / / / _ \/ /                     *
+*             / _ \/ /_/ / , _/ /__                    *
+*            /_//_/\____/_/|_/____/                    *
+*                                                      *
+* This file contains the essential handle data         *
+* structure, supporting data structures, and functions *
+* that define the user interface                       *
+*                                                      *
+********************************************************/
+
 #include <algorithm>
 #include <iostream>
 #include <istream>
@@ -11,6 +23,8 @@
 #ifndef HANDLE_H
 #define HANDLE_H
 using namespace std;
+
+// abstract class Curl
 class Curl {
     public:
         virtual void perform() {};
@@ -20,12 +34,12 @@ class Curl {
         template<typename T, typename... Args>
         void setOpt(int a, T b, Args... args); // variadic options
         template<typename T>
-        void setOpt(int a, T b); // only two args
+        void setOpt(int a, T b); // only two args, used to parse variadic fn
         shared_ptr<UserDefined> defs;
         void parse_url(string url);
 };
 
-
+// Easy handle, shareable
 class Easy : public Curl {
     public:
         Easy(); // initialize UserDefined and other shared objects
@@ -34,7 +48,7 @@ class Easy : public Curl {
          asio::steady_timer * timer;
 };
 
-
+// Multi handle, inheriting from Curl
 class Multi : public Curl {
     public:
         Multi();
@@ -120,6 +134,7 @@ void Curl::_setopt(int a, string b) {
     default: std::cerr << "Error: CURLPP_OPT not yet supported" << "\n";
     }
 }
+// two main setopt functions. peel of the arguments in pairs, process separately!
 template<typename T>
 void Curl::setOpt(int a, T b) {
     Curl::_setopt(a, b);
@@ -131,6 +146,7 @@ void Curl::setOpt(int a, T b, Args... args) {
     Curl::setOpt(args...);
 }
 
+// Easy constructor and perform implementation
 using asio::ip::tcp;
 Easy::Easy(){
     defs = std::make_shared<UserDefined>();
@@ -178,10 +194,10 @@ void Easy::perform(){
         delete timer;
 }
 
+// Multi constructor and perform implementation
 Multi::Multi(){
     defs = std::make_shared<UserDefined>();
 }
-
 
 void Multi::perform(){
     std::size_t maxfile = std::numeric_limits< std::size_t >::max();

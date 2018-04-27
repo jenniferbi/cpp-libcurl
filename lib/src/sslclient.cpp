@@ -1,12 +1,18 @@
-//
-// async_client.cpp
-// ~~~~~~~~~~~~~~~~
-//
-// Copyright (c) 2003-2008 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt">http://www.boost.org/LICENSE_1_0.txt</a>)
-//
+/********************************************************
+*               __   __  _____  __                     *
+*              / /  / / / / _ \/ /                     *
+*             / _ \/ /_/ / , _/ /__                    *
+*            /_//_/\____/_/|_/____/                    *
+*                                                      *
+* This file contains the implementation of sslclient.  *
+*                                                      *
+* It is based on example code from async_client.cpp    *
+* and ssl/client.cpp, please see                       *
+* https://www.boost.org/doc/libs/1_50_0/doc/           *
+* html/boost_asio/example/ssl/client.cpp               *
+*                                                      *
+********************************************************/
+
 #include "urldata.h"
 #include <iostream>
 #include <istream>
@@ -17,13 +23,14 @@
 
 using asio::ip::tcp;
 
+// sslhand constructor
 sslhand::sslhand(asio::io_service& io_service,
-      const std::string& server, const std::string& path, const std::size_t maxsize, const std::string& cert)
+      const std::string& server, const std::string& path, 
+      const std::size_t maxsize, const std::string& cert)
     : resolver_(io_service), ctx_(asio::ssl::context::sslv23),
-      socket_(io_service, ctx_),
-
-      response_(maxsize)// init list
+      socket_(io_service, ctx_), response_(maxsize) // init list
 {
+    // setting context
     ctx_.set_default_verify_paths();
     io_serv = &io_service;
     //ctx_.use_certificate_file(cert, asio::ssl::context::file_format::pem);
@@ -36,8 +43,10 @@ sslhand::sslhand(asio::io_service& io_service,
     request_stream << "Host: " << server << "\r\n";
     request_stream << "Accept: */*\r\n";
     request_stream << "Connection: close\r\n\r\n";
+
     // Start an asynchronous resolve to translate the server and service names
     // into a list of endpoints.
+    // we must query it as "https" for secure connection.
     tcp::resolver::query query(server, "https");
 
     resolver_.async_resolve(query,
@@ -110,6 +119,8 @@ void sslhand::handle_connect(const asio::error_code& err, tcp::resolver::iterato
           sslhand::handle_handshake(err);
       });
   }
+  // this is actually optional--do we want to keep trying other endpoints
+  // if the first fails? Often first one works, don't waste time trying more 
 /*  else if (endpoint_iterator != tcp::resolver::iterator())
   {
     // std::cerr << "try enxt endpoint\n";
@@ -145,7 +156,7 @@ void sslhand::handle_write_request(const asio::error_code& err)
 {
     if (!err)
     {
-        // std::cerr << "handle_write_request\n";
+    // std::cerr << "handle_write_request\n";
     // Read the response status line.
     asio::async_read_until(socket_, response_, "\r\n",
          [this](const asio::error_code& err, std::size_t bytes)
@@ -203,7 +214,7 @@ void sslhand::handle_read_headers()
     std::istream response_stream(&response_);
     std::string header;
     while (std::getline(response_stream, header) && header != "\r");
-        //std::cerr << header << "\n";
+    //std::cerr << header << "\n";
     //std::cerr << "\n";
 
     // Write whatever content we already have to output.
@@ -248,7 +259,7 @@ void sslhand::handle_read_content()
 
          });
 }
-
+// "main" function called by Easy handle and Multi handle to perform a transfer
 void sslhand::connect() {
   try
   {

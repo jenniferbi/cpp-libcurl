@@ -1,12 +1,19 @@
-//
-// async_client.cpp
-// ~~~~~~~~~~~~~~~~
-//
-// Copyright (c) 2003-2008 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt">http://www.boost.org/LICENSE_1_0.txt</a>)
-//
+/********************************************************
+*               __   __  _____  __                     *
+*              / /  / / / / _ \/ /                     *
+*             / _ \/ /_/ / , _/ /__                    *
+*            /_//_/\____/_/|_/____/                    *
+*                                                      *
+* This file contains the implementation of http client.*
+*                                                      *
+* It is based on example code from async_client.cpp    *
+* https://www.boost.org/doc/libs/1_40_0/doc/           *
+* html/boost_asio/example/http/client/async_client.cpp *
+*                                                      *
+********************************************************/
+
+
+
 #include "urldata.h"
 #include <iostream>
 #include <istream>
@@ -16,6 +23,7 @@
 //#include <error_code.hpp>
 using asio::ip::tcp;
 
+//httphand constructor
 httphand::httphand(asio::io_service& io_service,
       const std::string& server, const std::string& path, const std::size_t maxsize,
       std::function<int(const unsigned char *, std::size_t)>& fw,
@@ -25,7 +33,7 @@ httphand::httphand(asio::io_service& io_service,
       response_(maxsize), writeback(fw), readback(fr) // init list
 {
     io_serv = &io_service;
-    //writeback = f;
+
     // Form the request. We specify the "Connection: close" header so that the
     // server will close the socket after transmitting the response. This will
     // allow us to treat all data up until the EOF as the content.
@@ -51,6 +59,10 @@ httphand::httphand(asio::io_service& io_service,
         });
 
 }
+
+// typically not used. restart is preferable in non-error situations
+// because we can reuse the handle
+// but if we call stop, it is most likely an error situation
 void httphand::handle_stop()
 {
     io_serv->stop();
@@ -232,7 +244,7 @@ void httphand::handle_read_content()
          });
 }
 
-
+// "main" function called by Easy and Multi handles to perform the transfer.
 void httphand::connect() {
   try
   {
