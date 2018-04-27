@@ -26,7 +26,7 @@ sslhand::sslhand(asio::io_service& io_service,
 {
     ctx_.set_default_verify_paths();
     io_serv = &io_service;
-    ctx_.use_certificate_file(cert, asio::ssl::context::file_format::pem);
+    //ctx_.use_certificate_file(cert, asio::ssl::context::file_format::pem);
 
     // Form the request. We specify the "Connection: close" header so that the
     // server will close the socket after transmitting the response. This will

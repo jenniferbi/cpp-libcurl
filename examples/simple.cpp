@@ -13,7 +13,6 @@ int main(void)
     myhandle.setOpt(CURLPP_OPT_HOST, "images.metmuseum.org",
                     CURLPP_OPT_PATH, "/CRDImages/as/original/DP141263.jpg",
                     CURLPP_OPT_SCHEME, CURLPP_OPT_HTTPS,
-                    //CURLPP_OPT_TIMEOUT, 1000
                     CURLPP_OPT_SSLCERT, "ca.pem"
         );
 
