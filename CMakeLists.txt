@@ -13,7 +13,9 @@ set (CMAKE_VERBOSE_MAKEFILE OFF)
 
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/build/bin")
 file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/build/results")
+file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/tests/results")
 
 # for subdirectory cmakelists reference see: https://cmake.org/examples/
 add_subdirectory(lib)
 add_subdirectory(examples)
+add_subdirectory(tests)

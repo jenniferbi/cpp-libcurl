@@ -18,7 +18,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * Copied from CURL. Compiledin C++ to test out SWIRL
+ *
+ *************
+ ** Copied from CURL.
+ ** Compiled in C++ with modifications for comparision test with hURL
+ *************
  *
  ***************************************************************************/
 /* <DESC>
@@ -30,21 +34,29 @@
 #include <iostream>
 #include <fstream>
 #include <boost/timer/timer.hpp>
+#include <string>
 
-int main(void)
+int main(int argc, char** argv)
 {
-    std::ofstream output_file {"./results/simple_c.txt", std::ios_base::app};
+    //std::string url_name= "https://images.metmuseum.org/CRDImages/as/original/DP141263.jpg";
+    std::string url_name (argv[1]);
+    std::size_t pos = url_name.find_last_of("/");
+    std::string filename="./results/simple_c_";
+    filename.append(url_name.substr(pos+1));
+    filename.append(".csv");
+
+    const char *c_url_name = url_name.c_str();
+
+    std::ofstream output_file {filename, std::ios_base::app};
     // Not sure if we want to print out all these time values
-    boost::timer::auto_cpu_timer t(output_file, "%w\t%u\t%s\t%t\t%p\n");
+    boost::timer::auto_cpu_timer t(output_file, "%w\n");
 
     CURL *curl;
     CURLcode res;
 
     curl = curl_easy_init();
     if(curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, "https://images.metmuseum.org/CRDImages/dp/web-large/DP875552.jpg");
-        /* example.com is redirected, so we tell libcurl to follow redirection */
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+        curl_easy_setopt(curl, CURLOPT_URL, c_url_name);
 
         /* Perform the request, res will get the return code */
         res = curl_easy_perform(curl);
